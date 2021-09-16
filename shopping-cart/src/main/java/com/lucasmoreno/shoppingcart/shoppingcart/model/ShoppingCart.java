@@ -12,17 +12,16 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "shopping_carts")
 public class ShoppingCart {
 
-	@OneToMany(mappedBy = "shopping_cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    Set<ShoppingCartProduct> shoppingCartProducts;
-	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private Long shoppingCartId;
 
+	@OneToMany(mappedBy = "shoppingCartProductId", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<ShoppingCartProduct> shoppingCartProducts;
+
 	@ManyToOne
-	@Column(name = "user_id")
-	private String userId;
+	private User user;
 
 	@UpdateTimestamp
 	@Temporal(TemporalType.TIMESTAMP)	
@@ -42,12 +41,12 @@ public class ShoppingCart {
 		this.shoppingCartId = shoppingCartId;
 	}
 
-	public String getUserId() {
-		return userId;
+	public User getUser() {
+		return user;
 	}
 
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public Date getLastModifiedTimestamp() {
@@ -64,6 +63,14 @@ public class ShoppingCart {
 
 	public void setCreationtimestamp(Date creationtimestamp) {
 		this.creationtimestamp = creationtimestamp;
+	}
+
+	public Set<ShoppingCartProduct> getShoppingCartProducts() {
+		return shoppingCartProducts;
+	}
+
+	public void setShoppingCartProducts(Set<ShoppingCartProduct> shoppingCartProducts) {
+		this.shoppingCartProducts = shoppingCartProducts;
 	}
 
 	

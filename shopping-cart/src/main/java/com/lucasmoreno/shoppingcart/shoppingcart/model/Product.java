@@ -1,16 +1,11 @@
 package com.lucasmoreno.shoppingcart.shoppingcart.model;
 
-import java.util.Set;
-
 import javax.persistence.*;
 
 @Entity
 @Table(name = "products")
 public class Product {
 
-	@OneToMany(mappedBy = "product")
-    Set<ShoppingCartProduct> shoppingCartProducts;
-	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
@@ -26,11 +21,11 @@ public class Product {
 	private Double price;
 
 	@Column(name = "currency")
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	private CurrencyType currency;
 
 	@Column(name = "status")
-	@Enumerated(EnumType.ORDINAL)
+	@Enumerated(EnumType.STRING)
 	private ProductStatusType status;
 	
 	public Long getProductId() {

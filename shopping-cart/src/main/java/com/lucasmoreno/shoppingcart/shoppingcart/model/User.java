@@ -14,15 +14,47 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
-	private Long productId;
+	private Long userId;
 
 	@Column(name = "name")
-	String product;
+	String name;
 		    
 	@Column(name = "last_name")
-    String productQuantity;
+    String lastName;
 	
 	@Column(name = "vip")
     boolean vip;
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public boolean isVip() {
+		return vip;
+	}
+
+	public void setVip(boolean vip) {
+		this.vip = vip;
+	}
 	
 }
