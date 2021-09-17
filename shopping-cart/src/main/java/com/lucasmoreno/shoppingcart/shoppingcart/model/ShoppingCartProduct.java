@@ -24,6 +24,14 @@ public class ShoppingCartProduct {
 	@Column(name = "quantity")
 	Long productQuantity;
 
+	public ShoppingCartProduct() {
+		super();
+	}
+	public ShoppingCartProduct(Product product) {
+		this.product = product;
+		this.productQuantity = 1L;
+	}
+
 	public Long getShoppingCartProductId() {
 		return shoppingCartProductId;
 	}

@@ -1,8 +1,7 @@
 package com.lucasmoreno.shoppingcart.shoppingcart.dto;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.lucasmoreno.shoppingcart.shoppingcart.model.ShoppingCart;
 import com.lucasmoreno.shoppingcart.shoppingcart.model.ShoppingCartProduct;
@@ -10,13 +9,12 @@ import com.lucasmoreno.shoppingcart.shoppingcart.model.ShoppingCartProduct;
 public class ShoppingCartDto {
 
 	private Long shoppingCartId;
-	@Autowired
 	private List<ShoppingCartProductDto> shoppingCartProductsDtoList;
-	private double total;
+	private Double total;
 
 	public ShoppingCartDto(ShoppingCart shoppingCart) {
 		this.shoppingCartId = shoppingCart.getShoppingCartId();
-
+		this.shoppingCartProductsDtoList = new ArrayList<>();
 		for (ShoppingCartProduct shoppingCartProduct : shoppingCart.getShoppingCartProducts()) {
 			shoppingCartProductsDtoList.add(new ShoppingCartProductDto(shoppingCartProduct));
 		}
@@ -43,7 +41,7 @@ public class ShoppingCartDto {
 		return total;
 	}
 
-	public void setTotal(double total) {
+	public void setTotal(Double total) {
 		this.total = total;
 	}
 

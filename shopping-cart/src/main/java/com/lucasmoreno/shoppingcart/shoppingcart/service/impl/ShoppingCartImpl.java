@@ -89,7 +89,7 @@ public class ShoppingCartImpl implements ShoppingCartService {
 
 	/**
 	 * Generate a Product list with a specific number of more expensive products
-	 * base on their price. It will return the first ocurrencies if the price is the
+	 * base on their price. It will return the first currencies if the price is the
 	 * same.
 	 * 
 	 * @param number   of products to be retrieve.
@@ -196,7 +196,9 @@ public class ShoppingCartImpl implements ShoppingCartService {
 	 */
 	@Override
 	public ShoppingCartDto addProductToShoppingCart(ProductShoppingKeyDto productShoppingKeyDto) {
-		return this.generateShoppingCartDto(this.newProductInShoppingCart(productShoppingKeyDto));
+		ShoppingCart shoppingCart = this.newProductInShoppingCart(productShoppingKeyDto);
+		this.shoppingCartRepository.save(shoppingCart);
+		return this.generateShoppingCartDto(shoppingCart);
 	}
 
 	/**
@@ -208,7 +210,9 @@ public class ShoppingCartImpl implements ShoppingCartService {
 	 */
 	@Override
 	public ShoppingCartDto removeProductFromShoppingCart(ProductShoppingKeyDto productShoppingKeyDto) {
-		return this.generateShoppingCartDto(this.removeProductInShoppingCart(productShoppingKeyDto));
+		ShoppingCart shoppingCart = this.removeProductInShoppingCart(productShoppingKeyDto);
+		this.shoppingCartRepository.save(shoppingCart);
+		return this.generateShoppingCartDto(shoppingCart);
 	}
 
 	/**
@@ -231,7 +235,7 @@ public class ShoppingCartImpl implements ShoppingCartService {
 
 			if (!shoppingCartProducts.isEmpty()) {
 				if (shoppingCartProduct.getProductQuantity() > 0) {
-					shoppingCartProduct.setProductQuantity(shoppingCartProduct.getProductQuantity() + 1);
+					shoppingCartProduct.setProductQuantity(shoppingCartProduct.getProductQuantity() - 1);
 					shoppingCartProducts.add(shoppingCartProduct);
 				} else {
 					shoppingCartProducts.remove(shoppingCartProduct);
@@ -261,7 +265,8 @@ public class ShoppingCartImpl implements ShoppingCartService {
 					.findAny().orElse(null);
 
 			if (shoppingCartProducts.isEmpty()) {
-				Product product = this.productRepository.getById(productShoppingKeyDto.getProductId());
+				Product product = this.productRepository.findById(productShoppingKeyDto.getProductId()).orElse(null);				
+				shoppingCartProduct = new ShoppingCartProduct(product);
 				shoppingCartProduct.setProduct(product);
 				shoppingCartProduct.setProductQuantity(1L);
 				shoppingCartProduct.setShoppingCartProductId(productShoppingKeyDto.getShoppingcartId());
@@ -301,21 +306,23 @@ public class ShoppingCartImpl implements ShoppingCartService {
 	 * @return Amount for the total shopping cart value base on strategies.
 	 */
 
-	private double setShoppingCartStrategy(ShoppingCart shoppingCart) {
+	private Double setShoppingCartStrategy(ShoppingCart shoppingCart) {
 
 		Long totalProducts = 0L;
-		double totalPrice = 0.0;
+		Double totalPrice=0.0;
 
 		if (totalProducts.equals(MAX_PRODUCTS)) {
 			totalPrice = shoppingCart.calculateTotalPrice(new PercentageDiscountPaymentStrategy());
-		} else if (totalProducts.equals(MIN_PRODUCTS)) {
-			if (this.promotionalDateService.validate()) {
-				totalPrice = shoppingCart.calculateTotalPrice(new GeneralDiscountPaymentStrategy());
-			} else if (shoppingCart.getUser().isVip()) {
+		} else if (Double.compare(totalProducts, MIN_PRODUCTS) <= 0) {
+			if (shoppingCart.getUser().isVip() ) {
 				totalPrice = shoppingCart.calculateTotalPrice(new VipDiscountPaymentStrategy());
-			} else {
+			} else if (this.promotionalDateService.validate()) {
+				totalPrice = shoppingCart.calculateTotalPrice(new GeneralDiscountPaymentStrategy());
+			}else {
 				totalPrice = shoppingCart.calculateTotalPrice(new GeneralPaymentStrategy());
 			}
+		}else {
+			totalPrice = shoppingCart.calculateTotalPrice(new GeneralPaymentStrategy());
 		}
 
 		return totalPrice;

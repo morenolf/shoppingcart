@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lucasmoreno.shoppingcart.shoppingcart.dto.ProductDto;
 import com.lucasmoreno.shoppingcart.shoppingcart.dto.ProductShoppingKeyDto;
 import com.lucasmoreno.shoppingcart.shoppingcart.dto.ShoppingCartDto;
+import com.lucasmoreno.shoppingcart.shoppingcart.model.Product;
+import com.lucasmoreno.shoppingcart.shoppingcart.repository.ProductRepository;
 import com.lucasmoreno.shoppingcart.shoppingcart.service.ShoppingCartService;
 import com.lucasmoreno.shoppingcart.shoppingcart.service.UserService;
 
@@ -25,6 +28,8 @@ public class ShoppingCartController {
 
 	@Autowired
 	private ShoppingCartService shoppingCartService;
+	@Autowired
+	private ProductRepository productRepository;
 
 	/**
 	 * Creates a new shopping cart based on an user identification.
@@ -35,7 +40,7 @@ public class ShoppingCartController {
 	 */
 	@GetMapping(value = "/newShoppingCart", produces = "application/json")
 	@ResponseBody
-	public Long createShoppingCart(@RequestParam(value = "userIdentification") Long userIdentification) {
+	public Long createShoppingCart(@RequestBody Long userIdentification) {
 		return shoppingCartService.createShoppingCart(userIdentification);
 	}
 
@@ -47,7 +52,7 @@ public class ShoppingCartController {
 
 	@RequestMapping(value = "/removeShoppingCart", produces = "application/json")
 	@ResponseBody
-	public void removeShoppingCart(@RequestParam(value = "shoppingCartId") Long shoppingCartId) {
+	public void removeShoppingCart(@RequestBody Long shoppingCartId) {
 		shoppingCartService.removeShoppingCart(shoppingCartId);
 	}
 
@@ -59,8 +64,7 @@ public class ShoppingCartController {
 	 */
 	@RequestMapping(value = "/addProductToShoppingCart", consumes = "application/json")
 	@ResponseBody
-	public ShoppingCartDto addProductToShoppingCart(
-			@RequestParam(value = "shoppingCartId") ProductShoppingKeyDto productShoppingKeyDto) {
+	public ShoppingCartDto addProductToShoppingCart(@RequestBody ProductShoppingKeyDto productShoppingKeyDto) {
 		return shoppingCartService.addProductToShoppingCart(productShoppingKeyDto);
 	}
 
@@ -73,8 +77,7 @@ public class ShoppingCartController {
 
 	@RequestMapping(value = "/removeProductFromShoppingCart", consumes = "application/json")
 	@ResponseBody
-	public ShoppingCartDto removeProductFromShoppingCart(
-			@RequestParam(value = "shoppingCartId") ProductShoppingKeyDto productShoppingKeyDto) {
+	public ShoppingCartDto removeProductFromShoppingCart(@RequestBody ProductShoppingKeyDto productShoppingKeyDto) {
 		return shoppingCartService.removeProductFromShoppingCart(productShoppingKeyDto);
 	}
 
@@ -85,10 +88,23 @@ public class ShoppingCartController {
 	 * @param userIdentification
 	 * @return List with ProductDto
 	 */
-	@RequestMapping(value = "/removeProductFromShoppingCart", produces = "application/json")
+	@RequestMapping(value = "/getMoreExpensiveProductsByUser", produces = "application/json")
 	@ResponseBody
-	public List<ProductDto> getMoreExpensiveProductsByUser(
-			@RequestParam(value = "userIdentification") Long userIdentification) {
+	public List<ProductDto> getMoreExpensiveProductsByUser(@RequestBody Long userIdentification) {
 		return shoppingCartService.retrieveMoreExpensiveProductsByUser(userIdentification);
+	}
+
+	/**
+	 * 
+	 * Calculates the more expensive products for a User in his purchase history.
+	 * 
+	 * @param userIdentification
+	 * @return List with ProductDto
+	 */
+	@RequestMapping(value = "/getProductById", produces = "application/json")
+	@ResponseBody
+	public ProductDto getProductById(@RequestBody Long productId) {
+		Product product = this.productRepository.findById(productId).orElse(null);
+		return new ProductDto(product);
 	}
 }
