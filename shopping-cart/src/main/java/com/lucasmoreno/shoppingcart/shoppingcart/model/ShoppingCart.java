@@ -1,12 +1,16 @@
 package com.lucasmoreno.shoppingcart.shoppingcart.model;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.lucasmoreno.shoppingcart.shoppingcart.strategy.PaymentStrategy;
+import com.lucasmoreno.shoppingcart.shoppingcart.strategy.impl.PercentageDiscountPaymentStrategy;
 
 @Entity
 @Table(name = "shopping_carts")
@@ -18,13 +22,13 @@ public class ShoppingCart {
 	private Long shoppingCartId;
 
 	@OneToMany(mappedBy = "shoppingCartProductId", cascade = CascadeType.ALL, orphanRemoval = true)
-    Set<ShoppingCartProduct> shoppingCartProducts;
+	List<ShoppingCartProduct> shoppingCartProducts;
 
 	@ManyToOne
 	private User user;
 
 	@UpdateTimestamp
-	@Temporal(TemporalType.TIMESTAMP)	
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "last_modified_timestamp")
 	private Date lastModifiedTimestamp;
 
@@ -32,6 +36,9 @@ public class ShoppingCart {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "creation_time_stamp")
 	private Date creationtimestamp;
+
+	@Column(name = "status")
+	boolean status;
 
 	public Long getShoppingCartId() {
 		return shoppingCartId;
@@ -65,13 +72,25 @@ public class ShoppingCart {
 		this.creationtimestamp = creationtimestamp;
 	}
 
-	public Set<ShoppingCartProduct> getShoppingCartProducts() {
+	public List<ShoppingCartProduct> getShoppingCartProducts() {
 		return shoppingCartProducts;
 	}
 
-	public void setShoppingCartProducts(Set<ShoppingCartProduct> shoppingCartProducts) {
+	public void setShoppingCartProducts(List<ShoppingCartProduct> shoppingCartProducts) {
 		this.shoppingCartProducts = shoppingCartProducts;
 	}
 
-	
+	public boolean isStatus() {
+		return status;
+	}
+
+	public void setStatus(boolean status) {
+		this.status = status;
+	}
+
+	public double calculateTotalPrice(PaymentStrategy paymentStrategy) {
+
+		return paymentStrategy.calculateTotal(this);
+	}
+
 }
