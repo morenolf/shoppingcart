@@ -2,7 +2,6 @@ package com.lucasmoreno.shoppingcart.shoppingcart.model;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.*;
 
@@ -10,7 +9,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.lucasmoreno.shoppingcart.shoppingcart.strategy.PaymentStrategy;
-import com.lucasmoreno.shoppingcart.shoppingcart.strategy.impl.PercentageDiscountPaymentStrategy;
 
 @Entity
 @Table(name = "shopping_carts")
@@ -38,7 +36,8 @@ public class ShoppingCart {
 	private Date creationtimestamp;
 
 	@Column(name = "status")
-	boolean status;
+	@Enumerated(EnumType.STRING)
+	ShoppingCartStatusType shoppingCartStatus;
 
 	public Long getShoppingCartId() {
 		return shoppingCartId;
@@ -80,12 +79,12 @@ public class ShoppingCart {
 		this.shoppingCartProducts = shoppingCartProducts;
 	}
 
-	public boolean isStatus() {
-		return status;
+	public ShoppingCartStatusType getShoppingCartStatus() {
+		return this.shoppingCartStatus;
 	}
 
-	public void setStatus(boolean status) {
-		this.status = status;
+	public void setShoppingCartStatus(ShoppingCartStatusType status) {
+		this.shoppingCartStatus = status;
 	}
 
 	public double calculateTotalPrice(PaymentStrategy paymentStrategy) {

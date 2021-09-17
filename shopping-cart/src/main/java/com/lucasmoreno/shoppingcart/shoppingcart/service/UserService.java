@@ -1,6 +1,6 @@
 package com.lucasmoreno.shoppingcart.shoppingcart.service;
 
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -9,6 +9,6 @@ import com.lucasmoreno.shoppingcart.shoppingcart.model.User;
 @Service
 public interface UserService {
 
-	List<User> validUserByUserIdentification(Long userIdentification);
+	Optional<User> findFirstByUserIdentification(Long userIdentification);
 
 }

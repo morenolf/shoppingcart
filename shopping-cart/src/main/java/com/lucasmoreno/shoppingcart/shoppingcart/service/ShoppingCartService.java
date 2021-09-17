@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.lucasmoreno.shoppingcart.shoppingcart.dto.ProductDto;
 import com.lucasmoreno.shoppingcart.shoppingcart.dto.ProductShoppingKeyDto;
 import com.lucasmoreno.shoppingcart.shoppingcart.dto.ShoppingCartDto;
 import com.lucasmoreno.shoppingcart.shoppingcart.model.Product;
@@ -19,9 +20,9 @@ public interface ShoppingCartService {
 
 	public ShoppingCartDto addProductToShoppingCart(ProductShoppingKeyDto productShoppingKeyDto);
 
-	public ShoppingCartDto removeProductToShoppingCart(Long productId, Long shoppingCartId);
+	public ShoppingCartDto removeProductFromShoppingCart(ProductShoppingKeyDto productShoppingKeyDto);
 
-	public List<Product> retrieveMoreExpensiveProductsByUser(Long userIdentification);
+	public List<ProductDto> retrieveMoreExpensiveProductsByUser(Long userIdentification);
 
 	public Optional<ShoppingCart> findByShopingCartById(Long shoppingCartId);
 

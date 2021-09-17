@@ -6,8 +6,17 @@ import com.lucasmoreno.shoppingcart.shoppingcart.model.ShoppingCart;
 import com.lucasmoreno.shoppingcart.shoppingcart.model.ShoppingCartProduct;
 import com.lucasmoreno.shoppingcart.shoppingcart.strategy.PaymentStrategy;
 
+/**
+ * Strategy pattern default calculation for total.
+ * 
+ * @author Lucas
+ *
+ */
 public class GeneralPaymentStrategy implements PaymentStrategy {
 
+	/**
+	 * Calculates total base on number of products and price. 
+	 */
 	@Override
 	public Double calculateTotal(ShoppingCart shoppingCart) {
 
