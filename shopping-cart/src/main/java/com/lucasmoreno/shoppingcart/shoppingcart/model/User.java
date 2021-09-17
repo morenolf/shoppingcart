@@ -1,4 +1,5 @@
 package com.lucasmoreno.shoppingcart.shoppingcart.model;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,12 +19,15 @@ public class User {
 
 	@Column(name = "name")
 	String name;
-		    
+
 	@Column(name = "last_name")
-    String lastName;
-	
+	String lastName;
+
 	@Column(name = "vip")
-    boolean vip;
+	boolean vip;
+
+	@Column(name = "identification")
+	Long identification;
 
 	public Long getUserId() {
 		return userId;
@@ -56,5 +60,13 @@ public class User {
 	public void setVip(boolean vip) {
 		this.vip = vip;
 	}
-	
+
+	public Long getIdentification() {
+		return identification;
+	}
+
+	public void setIdentification(Long identification) {
+		this.identification = identification;
+	}
+
 }

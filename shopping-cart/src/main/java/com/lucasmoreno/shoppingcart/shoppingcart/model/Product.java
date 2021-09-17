@@ -27,7 +27,7 @@ public class Product {
 	@Column(name = "status")
 	@Enumerated(EnumType.STRING)
 	private ProductStatusType status;
-	
+
 	public Long getProductId() {
 		return productId;
 	}

@@ -6,6 +6,5 @@ import org.springframework.stereotype.Repository;
 import com.lucasmoreno.shoppingcart.shoppingcart.model.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-	
-	
+
 }
