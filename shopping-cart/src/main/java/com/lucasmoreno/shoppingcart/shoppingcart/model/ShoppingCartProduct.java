@@ -20,9 +20,9 @@ public class ShoppingCartProduct {
 
 	@ManyToOne
 	Product product;
-		    
+
 	@Column(name = "quantity")
-    Long productQuantity;
+	Long productQuantity;
 
 	public Long getShoppingCartProductId() {
 		return shoppingCartProductId;
@@ -47,5 +47,5 @@ public class ShoppingCartProduct {
 	public void setProductQuantity(Long productQuantity) {
 		this.productQuantity = productQuantity;
 	}
-	
+
 }
