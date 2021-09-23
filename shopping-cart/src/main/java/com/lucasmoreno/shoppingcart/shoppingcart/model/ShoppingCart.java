@@ -19,7 +19,7 @@ public class ShoppingCart {
 	@Column(name = "id")
 	private Long shoppingCartId;
 
-	@OneToMany(mappedBy = "shoppingCartProductId", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "shoppingCartProductId", cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.REFRESH})
 	List<ShoppingCartProduct> shoppingCartProducts;
 
 	@ManyToOne

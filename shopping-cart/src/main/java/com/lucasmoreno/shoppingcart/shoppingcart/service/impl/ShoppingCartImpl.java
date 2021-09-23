@@ -2,6 +2,7 @@ package com.lucasmoreno.shoppingcart.shoppingcart.service.impl;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ import com.lucasmoreno.shoppingcart.shoppingcart.model.ShoppingCartProduct;
 import com.lucasmoreno.shoppingcart.shoppingcart.model.ShoppingCartStatusType;
 import com.lucasmoreno.shoppingcart.shoppingcart.model.User;
 import com.lucasmoreno.shoppingcart.shoppingcart.repository.ProductRepository;
+import com.lucasmoreno.shoppingcart.shoppingcart.repository.ShoppingCartProductRepository;
 import com.lucasmoreno.shoppingcart.shoppingcart.repository.ShoppingCartRepository;
 import com.lucasmoreno.shoppingcart.shoppingcart.service.PromotionalDateService;
 import com.lucasmoreno.shoppingcart.shoppingcart.service.ShoppingCartService;
@@ -29,10 +31,10 @@ import com.lucasmoreno.shoppingcart.shoppingcart.strategy.impl.VipDiscountPaymen
 /**
  * Implementation of a Shopping Cart. Shopping Cart for this service will
  * persist the shopping cart if it's pending (only one per user) or the products
- * have been purchased.
- * Allows to create, delete shopping carts. 
- * Add or remove products from shopping cart.
- * Calculate more expensive products purchased by an User.
+ * have been purchased. Allows to create, delete shopping carts. Add or remove
+ * products from shopping cart. Calculate more expensive products purchased by
+ * an User.
+ * 
  * @author Lucas
  *
  */
@@ -46,6 +48,8 @@ public class ShoppingCartImpl implements ShoppingCartService {
 	private ProductRepository productRepository;
 	@Autowired
 	private ShoppingCartRepository shoppingCartRepository;
+	@Autowired
+	private ShoppingCartProductRepository shoppingCartProductRepository;
 	@Autowired
 	private UserService userService;
 	@Autowired
@@ -228,12 +232,14 @@ public class ShoppingCartImpl implements ShoppingCartService {
 		ShoppingCartProduct shoppingCartProduct;
 		if (shoppingCart != null) {
 			List<ShoppingCartProduct> shoppingCartProducts = shoppingCart.getShoppingCartProducts();
+			// TODO what happens when the shopping cart doesn't have a list instantiated.
+			// Null pointer?
 			shoppingCartProduct = shoppingCart.getShoppingCartProducts().stream()
 					.filter(shoppingCartProduct1 -> shoppingCartProduct1.getProduct().getProductId()
 							.equals(productShoppingKeyDto.getProductId()))
 					.findAny().orElse(null);
 
-			if (!shoppingCartProducts.isEmpty()) {
+			if (shoppingCartProduct != null) {
 				if (shoppingCartProduct.getProductQuantity() > 0) {
 					shoppingCartProduct.setProductQuantity(shoppingCartProduct.getProductQuantity() - 1);
 					shoppingCartProducts.add(shoppingCartProduct);
@@ -264,8 +270,8 @@ public class ShoppingCartImpl implements ShoppingCartService {
 							.equals(productShoppingKeyDto.getProductId()))
 					.findAny().orElse(null);
 
-			if (shoppingCartProducts.isEmpty()) {
-				Product product = this.productRepository.findById(productShoppingKeyDto.getProductId()).orElse(null);				
+			if (shoppingCartProduct == null) {
+				Product product = this.productRepository.findById(productShoppingKeyDto.getProductId()).orElse(null);
 				shoppingCartProduct = new ShoppingCartProduct(product);
 				shoppingCartProduct.setProduct(product);
 				shoppingCartProduct.setProductQuantity(1L);
@@ -308,20 +314,21 @@ public class ShoppingCartImpl implements ShoppingCartService {
 
 	private Double setShoppingCartStrategy(ShoppingCart shoppingCart) {
 
-		Long totalProducts = 0L;
-		Double totalPrice=0.0;
+		Long totalProducts = shoppingCart.getShoppingCartProducts().stream()
+				.mapToLong(ShoppingCartProduct::getProductQuantity).sum();
+		Double totalPrice;
 
 		if (totalProducts.equals(MAX_PRODUCTS)) {
 			totalPrice = shoppingCart.calculateTotalPrice(new PercentageDiscountPaymentStrategy());
 		} else if (Double.compare(totalProducts, MIN_PRODUCTS) <= 0) {
-			if (shoppingCart.getUser().isVip() ) {
+			if (shoppingCart.getUser().isVip()) {
 				totalPrice = shoppingCart.calculateTotalPrice(new VipDiscountPaymentStrategy());
 			} else if (this.promotionalDateService.validate()) {
 				totalPrice = shoppingCart.calculateTotalPrice(new GeneralDiscountPaymentStrategy());
-			}else {
+			} else {
 				totalPrice = shoppingCart.calculateTotalPrice(new GeneralPaymentStrategy());
 			}
-		}else {
+		} else {
 			totalPrice = shoppingCart.calculateTotalPrice(new GeneralPaymentStrategy());
 		}
 

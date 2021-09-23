@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,12 +17,15 @@ import com.lucasmoreno.shoppingcart.shoppingcart.dto.ProductDto;
 import com.lucasmoreno.shoppingcart.shoppingcart.dto.ProductShoppingKeyDto;
 import com.lucasmoreno.shoppingcart.shoppingcart.dto.ShoppingCartDto;
 import com.lucasmoreno.shoppingcart.shoppingcart.model.Product;
+import com.lucasmoreno.shoppingcart.shoppingcart.model.User;
 import com.lucasmoreno.shoppingcart.shoppingcart.repository.ProductRepository;
+import com.lucasmoreno.shoppingcart.shoppingcart.repository.UserRepository;
 import com.lucasmoreno.shoppingcart.shoppingcart.service.ShoppingCartService;
 import com.lucasmoreno.shoppingcart.shoppingcart.service.UserService;
 
 @RestController
 @RequestMapping("shoppingcart")
+@CrossOrigin(origins = "http://localhost:4200")
 public class ShoppingCartController {
 
 	Logger logger = LoggerFactory.getLogger(ShoppingCartController.class);
@@ -30,15 +34,53 @@ public class ShoppingCartController {
 	private ShoppingCartService shoppingCartService;
 	@Autowired
 	private ProductRepository productRepository;
+	@Autowired
+	private UserRepository userRepostory;
 
+	
+	/**
+	 * Retrieves all possible products.
+	 * 
+	 * @return List<Product>
+	 */
+	@RequestMapping(value = "/listAllProducts", produces = "application/json")
+	@ResponseBody
+	public List<Product> getAllProducts() {
+		return productRepository.findAll();
+	}
+
+	/**
+	 * Validates that the user logged in is valid.
+	 * 
+	 * @param userId
+	 * @return User
+	 */
+	@RequestMapping(value = "/validateUser", produces = "application/json")
+	@ResponseBody
+	public User validateUser(@RequestBody Long userId) {
+		return userRepostory.findById(userId).orElse(null);
+	}
+	
+	/**
+	 * Creates a new shopping cart based on an user identification.
+	 * 
+	 * @param Retrieves list of users 
+	 * @return List<User> 
+	 */
+	@RequestMapping(value = "/getUsers", produces = "application/json")
+	@ResponseBody
+	public List<User> getUsers() {
+		return userRepostory.findAll();
+	}
+	
+	
 	/**
 	 * Creates a new shopping cart based on an user identification.
 	 * 
 	 * @param userIdentification
 	 * @return Shopping Cart Id
-	 * @throws Exception
 	 */
-	@GetMapping(value = "/newShoppingCart", produces = "application/json")
+	@RequestMapping(value = "/newShoppingCart", produces = "application/json")
 	@ResponseBody
 	public Long createShoppingCart(@RequestBody Long userIdentification) {
 		return shoppingCartService.createShoppingCart(userIdentification);
