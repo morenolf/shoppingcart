@@ -3,7 +3,7 @@ package com.lucasmoreno.shoppingcart.shoppingcart.dto;
 public class ProductShoppingKeyDto {
 
 	private Long productId;
-	private Long shoppingcartId;
+	private Long shoppingCartId;
 
 	public Long getProductId() {
 		return productId;
@@ -13,12 +13,12 @@ public class ProductShoppingKeyDto {
 		this.productId = productId;
 	}
 
-	public Long getShoppingcartId() {
-		return shoppingcartId;
+	public Long getShoppingCartId() {
+		return shoppingCartId;
 	}
 
-	public void setShoppingcartId(Long shoppingcartId) {
-		this.shoppingcartId = shoppingcartId;
+	public void setShoppingCartId(Long shoppingCartId) {
+		this.shoppingCartId = shoppingCartId;
 	}
 
 }
