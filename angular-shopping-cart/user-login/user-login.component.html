@@ -1,0 +1,32 @@
+<div class="panel panel-primary">
+    <div class="panel-heading">
+      <h2>Product List</h2>
+    </div>
+    <div class="panel-body">
+      <label>
+        <input type="checkbox" name="isPromotionalDate"  [(ngModel)]="isPromotionalDate">
+        Is Promotional Date
+      </label>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>User Name</th>
+            <th>User Last Name</th>
+            <th>VIP</th>
+            <th>Identification</th>
+            <th>Select</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td>{{user.name}}</td>
+            <td>{{user.lastName}}</td>
+            <td>{{user.vip}}</td>
+            <td>{{user.identification}}</td>            
+            <td><button (click)="selectUser(user.userId)" class="btn btn-info">Select</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
