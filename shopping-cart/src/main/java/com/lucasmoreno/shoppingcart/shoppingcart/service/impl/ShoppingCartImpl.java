@@ -6,6 +6,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -70,7 +74,7 @@ public class ShoppingCartImpl implements ShoppingCartService {
 			return null;
 		}
 		List<ShoppingCart> shoppingCartList = this.shoppingCartRepository
-				.findAllByUserUserIdAndShoppingCartStatus(user.getUserId(), ShoppingCartStatusType.PENDING);
+				.findAllByUserUserIdAndShoppingCartStatus(user.getUserId(), ShoppingCartStatusType.PAID);
 
 		return this.createProductsDto(this.filterProductsByPrice(NUMBER_OF_PRODUCTS, shoppingCartList));
 	}
@@ -158,8 +162,8 @@ public class ShoppingCartImpl implements ShoppingCartService {
 
 		ShoppingCart shoppingCart = this.shoppingCartRepository
 				.findFirstByUserUserIdAndShoppingCartStatus(user.getUserId(), ShoppingCartStatusType.PENDING)
-				.orElse(this.newShoppingCart(user));
-
+				.orElseGet(() -> this.newShoppingCart(user));
+		
 		return shoppingCart.getShoppingCartId();
 	}
 
@@ -184,9 +188,8 @@ public class ShoppingCartImpl implements ShoppingCartService {
 	 */
 	@Override
 	public void removeShoppingCart(Long shoppingCartId) {
-		Optional<ShoppingCart> shoppingCartList = this.shoppingCartRepository.findById(shoppingCartId);
-		// TODO verify if it's possible to change this and avoid finding the cart first.
-		if (shoppingCartList.isPresent()) {
+		Optional<ShoppingCart> shoppingCart = this.shoppingCartRepository.findById(shoppingCartId);
+		if(shoppingCart.isPresent()) {
 			shoppingCartRepository.deleteById(shoppingCartId);
 		}
 	}
@@ -201,55 +204,8 @@ public class ShoppingCartImpl implements ShoppingCartService {
 	@Override
 	public ShoppingCartDto addProductToShoppingCart(ProductShoppingKeyDto productShoppingKeyDto) {
 		ShoppingCart shoppingCart = this.newProductInShoppingCart(productShoppingKeyDto);
-		this.shoppingCartRepository.save(shoppingCart);
+		//this.shoppingCartRepository.save(shoppingCart);
 		return this.generateShoppingCartDto(shoppingCart);
-	}
-
-	/**
-	 * Removes a new product from a shopping cart and it will be persisted on the
-	 * repository.
-	 * 
-	 * @param Shopping Cart and product key.
-	 * @return Shopping Cart Dto.
-	 */
-	@Override
-	public ShoppingCartDto removeProductFromShoppingCart(ProductShoppingKeyDto productShoppingKeyDto) {
-		ShoppingCart shoppingCart = this.removeProductInShoppingCart(productShoppingKeyDto);
-		this.shoppingCartRepository.save(shoppingCart);
-		return this.generateShoppingCartDto(shoppingCart);
-	}
-
-	/**
-	 * Removes a product from Shopping Cart and returns the same without the product
-	 * or with one less quantity on shopping cart product.
-	 * 
-	 * @param Shopping Cart and product key.
-	 * @return Shopping Cart Dto.
-	 */
-	public ShoppingCart removeProductInShoppingCart(ProductShoppingKeyDto productShoppingKeyDto) {
-		ShoppingCart shoppingCart = this.shoppingCartRepository.findById(productShoppingKeyDto.getShoppingcartId())
-				.orElse(null);
-		ShoppingCartProduct shoppingCartProduct;
-		if (shoppingCart != null) {
-			List<ShoppingCartProduct> shoppingCartProducts = shoppingCart.getShoppingCartProducts();
-			// TODO what happens when the shopping cart doesn't have a list instantiated.
-			// Null pointer?
-			shoppingCartProduct = shoppingCart.getShoppingCartProducts().stream()
-					.filter(shoppingCartProduct1 -> shoppingCartProduct1.getProduct().getProductId()
-							.equals(productShoppingKeyDto.getProductId()))
-					.findAny().orElse(null);
-
-			if (shoppingCartProduct != null) {
-				if (shoppingCartProduct.getProductQuantity() > 0) {
-					shoppingCartProduct.setProductQuantity(shoppingCartProduct.getProductQuantity() - 1);
-					shoppingCartProducts.add(shoppingCartProduct);
-				} else {
-					shoppingCartProducts.remove(shoppingCartProduct);
-				}
-			}
-			shoppingCart.setShoppingCartProducts(shoppingCartProducts);
-		}
-		return shoppingCart;
 	}
 
 	/**
@@ -260,7 +216,7 @@ public class ShoppingCartImpl implements ShoppingCartService {
 	 * @return Shopping Cart Dto.
 	 */
 	private ShoppingCart newProductInShoppingCart(ProductShoppingKeyDto productShoppingKeyDto) {
-		ShoppingCart shoppingCart = this.shoppingCartRepository.findById(productShoppingKeyDto.getShoppingcartId())
+		ShoppingCart shoppingCart = this.shoppingCartRepository.findById(productShoppingKeyDto.getShoppingCartId())
 				.orElse(null);
 		ShoppingCartProduct shoppingCartProduct;
 		if (shoppingCart != null) {
@@ -275,17 +231,71 @@ public class ShoppingCartImpl implements ShoppingCartService {
 				shoppingCartProduct = new ShoppingCartProduct(product);
 				shoppingCartProduct.setProduct(product);
 				shoppingCartProduct.setProductQuantity(1L);
-				shoppingCartProduct.setShoppingCartProductId(productShoppingKeyDto.getShoppingcartId());
-
+				shoppingCartProduct.setShoppingCartProductId(productShoppingKeyDto.getShoppingCartId());
 			} else {
 				shoppingCartProduct.setProductQuantity(shoppingCartProduct.getProductQuantity() + 1);
-			}
+			}			
+			shoppingCartProduct.setShoppingCart(shoppingCart);
+			this.shoppingCartProductRepository.save(shoppingCartProduct);
 
 			shoppingCartProducts.add(shoppingCartProduct);
 			shoppingCart.setShoppingCartProducts(shoppingCartProducts);
 		}
 		return shoppingCart;
 	}
+	
+	/**
+	 * Removes a new product from a shopping cart and it will be persisted on the
+	 * repository.
+	 * 
+	 * @param Shopping Cart and product key.
+	 * @return Shopping Cart Dto.
+	 */
+	@Override
+	public ShoppingCartDto removeProductFromShoppingCart(ProductShoppingKeyDto productShoppingKeyDto) {
+		ShoppingCart shoppingCart = this.removeProductInShoppingCart(productShoppingKeyDto);
+		//this.shoppingCartRepository.save(shoppingCart);
+		return this.generateShoppingCartDto(shoppingCart);
+	}
+
+	/**
+	 * Removes a product from Shopping Cart and returns the same without the product
+	 * or with one less quantity on shopping cart product.
+	 * 
+	 * @param Shopping Cart and product key.
+	 * @return Shopping Cart Dto.
+	 */
+	public ShoppingCart removeProductInShoppingCart(ProductShoppingKeyDto productShoppingKeyDto) {
+		ShoppingCart shoppingCart = this.shoppingCartRepository.findById(productShoppingKeyDto.getShoppingCartId())
+				.orElse(null);
+		ShoppingCartProduct shoppingCartProduct;
+		if (shoppingCart != null) {
+			List<ShoppingCartProduct> shoppingCartProducts = shoppingCart.getShoppingCartProducts();
+			// TODO what happens when the shopping cart doesn't have a list instantiated.
+			// Null pointer?
+			shoppingCartProduct = shoppingCart.getShoppingCartProducts().stream()
+					.filter(shoppingCartProduct1 -> shoppingCartProduct1.getProduct().getProductId()
+							.equals(productShoppingKeyDto.getProductId()))
+					.findAny().orElse(null);
+
+			if (shoppingCartProduct != null) {
+				if (shoppingCartProduct.getProductQuantity() > 0) {
+					shoppingCartProduct.setProductQuantity(shoppingCartProduct.getProductQuantity() - 1L);					
+					shoppingCartProduct.setShoppingCart(shoppingCart);
+					this.shoppingCartProductRepository.save(shoppingCartProduct);
+					shoppingCartProducts.add(shoppingCartProduct);
+				} else {
+					this.shoppingCartProductRepository.delete(shoppingCartProduct);
+					shoppingCartProducts.remove(shoppingCartProduct);
+				}
+			}
+
+			shoppingCart.setShoppingCartProducts(shoppingCartProducts);
+		}
+		return shoppingCart;
+	}
+
+
 
 	/**
 	 * Generates Shopping Cart Dto as response.
@@ -323,7 +333,7 @@ public class ShoppingCartImpl implements ShoppingCartService {
 		} else if (Double.compare(totalProducts, MIN_PRODUCTS) <= 0) {
 			if (shoppingCart.getUser().isVip()) {
 				totalPrice = shoppingCart.calculateTotalPrice(new VipDiscountPaymentStrategy());
-			} else if (this.promotionalDateService.validate()) {
+			} else if (this.promotionalDateService.validatePromotionalDate()) {
 				totalPrice = shoppingCart.calculateTotalPrice(new GeneralDiscountPaymentStrategy());
 			} else {
 				totalPrice = shoppingCart.calculateTotalPrice(new GeneralPaymentStrategy());

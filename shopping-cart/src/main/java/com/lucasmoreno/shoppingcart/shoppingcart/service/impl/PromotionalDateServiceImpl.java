@@ -7,11 +7,16 @@ import com.lucasmoreno.shoppingcart.shoppingcart.service.PromotionalDateService;
 @Component
 public class PromotionalDateServiceImpl implements PromotionalDateService{
 
+	private boolean promotionalDate;
+	
 	@Override
-	public boolean validate() {
-		// TODO Auto-generated method stub
-		return true;
+	public boolean validatePromotionalDate() {
+		return promotionalDate;
 	}
 	
+	@Override
+	public void setPromotionalDate(boolean promotionalDate) {
+		this.promotionalDate = promotionalDate;
+	}
 
 }

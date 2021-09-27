@@ -6,10 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,8 +19,8 @@ import com.lucasmoreno.shoppingcart.shoppingcart.model.Product;
 import com.lucasmoreno.shoppingcart.shoppingcart.model.User;
 import com.lucasmoreno.shoppingcart.shoppingcart.repository.ProductRepository;
 import com.lucasmoreno.shoppingcart.shoppingcart.repository.UserRepository;
+import com.lucasmoreno.shoppingcart.shoppingcart.service.PromotionalDateService;
 import com.lucasmoreno.shoppingcart.shoppingcart.service.ShoppingCartService;
-import com.lucasmoreno.shoppingcart.shoppingcart.service.UserService;
 
 @RestController
 @RequestMapping("shoppingcart")
@@ -31,12 +30,24 @@ public class ShoppingCartController {
 	Logger logger = LoggerFactory.getLogger(ShoppingCartController.class);
 
 	@Autowired
+	private PromotionalDateService promotionalDateService;
+	@Autowired
 	private ShoppingCartService shoppingCartService;
 	@Autowired
 	private ProductRepository productRepository;
 	@Autowired
 	private UserRepository userRepostory;
-
+	
+	/**
+	 * Retrieves all promotional dates avialable.
+	 * 
+	 * @return List<Long>
+	 */
+	@RequestMapping(value = "/setPromotionalDates", produces = "application/json")
+	@ResponseBody
+	public void setPromotionalDates(@RequestBody boolean promotionalDate) {
+		this.promotionalDateService.setPromotionalDate(promotionalDate);
+	}
 	
 	/**
 	 * Retrieves all possible products.
@@ -104,8 +115,7 @@ public class ShoppingCartController {
 	 * @param productShoppingKeyDto
 	 * @return ShoppingCartDto with shopping cart id, status and product list.
 	 */
-	@RequestMapping(value = "/addProductToShoppingCart", consumes = "application/json")
-	@ResponseBody
+	@PostMapping(value = "/addProductToShoppingCart")
 	public ShoppingCartDto addProductToShoppingCart(@RequestBody ProductShoppingKeyDto productShoppingKeyDto) {
 		return shoppingCartService.addProductToShoppingCart(productShoppingKeyDto);
 	}
@@ -117,8 +127,7 @@ public class ShoppingCartController {
 	 * @return ShoppingCartDto with shopping cart id, status and product list.
 	 */
 
-	@RequestMapping(value = "/removeProductFromShoppingCart", consumes = "application/json")
-	@ResponseBody
+	@PostMapping(value = "/removeProductFromShoppingCart")
 	public ShoppingCartDto removeProductFromShoppingCart(@RequestBody ProductShoppingKeyDto productShoppingKeyDto) {
 		return shoppingCartService.removeProductFromShoppingCart(productShoppingKeyDto);
 	}
