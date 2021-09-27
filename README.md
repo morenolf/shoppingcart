@@ -12,6 +12,17 @@ Out of the Scope:
 
 This project doesn't have the capability to create, delete or modify users or products. This information is already present on the database and it will be use to add or remove the products from the shopping cart.
 
+Technologies:
+
+Spring boot.
+PostgresSQL as database.
+JPA for persistance model.
+Google cloud dependencies for host application on Google cloud engine. *Pending
+Junit and Mockito core for test cases. *Pending
+
+DATABASE Creation SQL
+https://github.com/morenolf/shoppingcart/blob/develop/PostgresDataBaseCreation.sql
+
 Web API:
 - GET /shoppingcart/setPromotionalDates/ Set promotional date based on boolean parameter. This value will be use to calculate the total of the shopping cart.
 - GET /shoppingcart/listAllProducts Retrieves all the products from database.
